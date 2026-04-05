@@ -1,0 +1,21 @@
+# Виртуальное окружение
+venv/
+
+# Python кэш
+__pycache__/
+*.pyc
+*.pyo
+
+# Результаты парсинга (большие файлы)
+*.json
+
+# Исходные данные
+*.pdf
+
+# Cursor / VS Code
+.cursor/
+.vscode/
+
+# Системные файлы Windows
+Thumbs.db
+desktop.ini
