@@ -1,5 +1,6 @@
 # Виртуальное окружение
 venv/
+.venv/
 
 # Python кэш
 __pycache__/
@@ -8,6 +9,7 @@ __pycache__/
 
 # Результаты парсинга (большие файлы)
 *.json
+!manual_country_map.json
 
 # Исходные данные
 *.pdf
@@ -15,7 +17,13 @@ __pycache__/
 # Cursor / VS Code
 .cursor/
 .vscode/
+.cursorignore
+
+# Локальный memory bank (контекст агента)
+memory-bank/
 
 # Системные файлы Windows
 Thumbs.db
 desktop.ini
+
+.env

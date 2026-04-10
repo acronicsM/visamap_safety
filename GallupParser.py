@@ -8,35 +8,23 @@
 
 Запуск:
   pip install pdfplumber
-  python GallupParser.py inputdata\Gallup_Global-Safety-Report-2025.pdf
+  python GallupParser.py inputdata\\Gallup_Global-Safety-Report-2025.pdf
+
+Опционально: --output, --reference-json (кэш API), --manual-map.
+Поле iso2 добавляется, если задан API_COUNTRIES_URL, --reference-json или есть алиасы в manual_country_map.json;
+иначе iso2: null.
 """
 
-import pdfplumber
+import argparse
 import json
+import os
 import re
 import sys
-import argparse
 
-# ─── Аргументы командной строки ──────────────────────────────────────────────
-parser = argparse.ArgumentParser(description="Парсер Gallup Global Safety Report PDF")
-parser.add_argument("pdf", help="Путь к PDF файлу")
-args = parser.parse_args()
+import pdfplumber
 
-PDF_FILE = args.pdf
+from country_reference import enrich_country_entries, load_reference
 
-# ─── Открываем PDF ───────────────────────────────────────────────────────────
-print(f"Открываем: {PDF_FILE}")
-
-try:
-    pdf = pdfplumber.open(PDF_FILE)
-except FileNotFoundError:
-    print(f"  ✗ Файл не найден: {PDF_FILE}")
-    sys.exit(1)
-
-print(f"  Страниц: {len(pdf.pages)}")
-
-
-# ─── Вспомогательная функция ─────────────────────────────────────────────────
 SKIP_WORDS = {
     "Country", "Territory", "Country / Territory",
     "Law and Order", "Index Score", "Safe to Walk",
@@ -47,27 +35,14 @@ SKIP_WORDS = {
 
 
 def extract_table(all_lines, value_re, value_cast):
-    """
-    Парсит таблицы где строки бывают двух форматов:
-      'Tajikistan 97'                      — одна запись
-      'Tajikistan 97 Indonesia 89'         — две записи (две колонки PDF)
-      'Taiwan (Province of China) 89'      — страна со скобками
-
-    Ключевая идея: разбиваем строку по границе "цифра → пробел → Заглавная",
-    получаем отдельные части, каждую парсим независимо.
-    """
     results = {}
 
     for line in all_lines:
-        # Разбиваем строку с двумя колонками на отдельные части
-        # '(?<=\d)' — позиция после цифры
-        # '(?=[A-Z])' — позиция перед заглавной буквой
         parts = re.split(r'(?<=\d)\s+(?=[A-Z])', line)
 
         for part in parts:
             part = part.strip()
 
-            # Паттерн: Название страны + значение + конец строки
             m = re.match(
                 r'^([A-Za-z][A-Za-z\s()\',./-]+?)\s+(' + value_re + r')\s*$',
                 part
@@ -77,16 +52,15 @@ def extract_table(all_lines, value_re, value_cast):
 
             country = m.group(1).strip()
 
-            # Фильтры от мусора
             if len(country) < 3:
                 continue
-            if len(country) > 50:          # длинные строки = текст статьи
+            if len(country) > 50:
                 continue
             if country in SKIP_WORDS:
                 continue
-            if re.search(r'\d', country):  # цифры в названии = мусор
+            if re.search(r'\d', country):
                 continue
-            if len(country.split()) > 6:   # слишком много слов = предложение
+            if len(country.split()) > 6:
                 continue
 
             try:
@@ -97,105 +71,93 @@ def extract_table(all_lines, value_re, value_cast):
     return results
 
 
-# ─── Шаг 1: Собираем текст со всех страниц ───────────────────────────────────
-print("\nШаг 1: Читаем текст страниц...")
+def parse_gallup_pdf(pdf_path: str) -> list[dict]:
+    pdf = pdfplumber.open(pdf_path)
+    all_lines = []
+    for page in pdf.pages:
+        text = page.extract_text()
+        if text:
+            all_lines.extend(text.split("\n"))
+    pdf.close()
 
-all_lines = []
-for page in pdf.pages:
-    text = page.extract_text()
-    if text:
-        all_lines.extend(text.split("\n"))
+    law_order = extract_table(all_lines, value_re=r'\d{2,3}', value_cast=int)
+    law_order = {k: v for k, v in law_order.items() if 49 <= v <= 100}
 
-pdf.close()
-print(f"  Всего строк: {len(all_lines)}")
+    safe_walk = extract_table(
+        all_lines,
+        value_re=r'\d{2,3}%',
+        value_cast=lambda x: int(x.rstrip('%'))
+    )
+    safe_walk = {k: v for k, v in safe_walk.items() if 0 <= v <= 100}
 
+    all_countries = set(law_order.keys()) | set(safe_walk.keys())
+    countries = []
+    for country in sorted(all_countries):
+        entry = {"country": country}
+        if country in law_order:
+            entry["law_and_order_index"] = law_order[country]
+        if country in safe_walk:
+            entry["safe_walking_night_pct"] = safe_walk[country]
+        countries.append(entry)
 
-# ─── Шаг 2: Парсим Law and Order Index ───────────────────────────────────────
-print("\nШаг 2: Парсим Law and Order Index...")
-
-law_order = extract_table(
-    all_lines,
-    value_re=r'\d{2,3}',
-    value_cast=int
-)
-# Допустимый диапазон индекса: 49-100
-law_order = {k: v for k, v in law_order.items() if 49 <= v <= 100}
-
-print(f"  Найдено стран: {len(law_order)}")
-
-
-# ─── Шаг 3: Парсим Safe to Walk Alone at Night ───────────────────────────────
-print("\nШаг 3: Парсим Safe to Walk Alone at Night %...")
-
-safe_walk = extract_table(
-    all_lines,
-    value_re=r'\d{2,3}%',
-    value_cast=lambda x: int(x.rstrip('%'))
-)
-# Допустимый диапазон: 0-100%
-safe_walk = {k: v for k, v in safe_walk.items() if 0 <= v <= 100}
-
-print(f"  Найдено стран: {len(safe_walk)}")
+    countries.sort(key=lambda x: x.get("law_and_order_index", 0), reverse=True)
+    return countries
 
 
-# ─── Шаг 4: Объединяем в один список ─────────────────────────────────────────
-print("\nШаг 4: Объединяем данные...")
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Парсер Gallup Global Safety Report PDF")
+    parser.add_argument("pdf", help="Путь к PDF файлу")
+    parser.add_argument(
+        "--output", "-o",
+        default="gallup_data.json",
+        help="Выходной JSON (по умолчанию gallup_data.json)",
+    )
+    parser.add_argument(
+        "--reference-json",
+        default=None,
+        help="Кэш ответа GET …/countries/names (вместо запроса по API_COUNTRIES_URL)",
+    )
+    parser.add_argument(
+        "--manual-map",
+        default=None,
+        help="Путь к manual_country_map.json (иначе MANUAL_COUNTRY_MAP_FILE или файл рядом со скриптом)",
+    )
+    args = parser.parse_args()
 
-all_countries = set(law_order.keys()) | set(safe_walk.keys())
+    pdf_path = args.pdf
+    print(f"Открываем: {pdf_path}")
 
-countries = []
-for country in sorted(all_countries):
-    entry = {"country": country}
+    try:
+        countries = parse_gallup_pdf(pdf_path)
+    except FileNotFoundError:
+        print(f"  ✗ Файл не найден: {pdf_path}")
+        sys.exit(1)
 
-    if country in law_order:
-        entry["law_and_order_index"] = law_order[country]
+    print(f"  Итого стран (до iso2): {len(countries)}")
 
-    if country in safe_walk:
-        entry["safe_walking_night_pct"] = safe_walk[country]
+    ref = load_reference(args.reference_json, os.environ.get("API_COUNTRIES_URL"))
+    enrich_country_entries(countries, ref=ref, manual_map_path=args.manual_map)
 
-    countries.append(entry)
+    result = {
+        "source": "Gallup Global Safety Report 2025",
+        "url": "https://www.gallup.com/analytics/356996/gallup-global-law-and-order.aspx",
+        "provider": "Gallup",
+        "year": 2024,
+        "note": (
+            "law_and_order_index: 0-100 (выше = безопаснее), составной индекс из 4 вопросов. "
+            "safe_walking_night_pct: % людей ответивших 'да' на вопрос о безопасности ночью."
+        ),
+        "total_countries": len(countries),
+        "countries": countries,
+    }
 
-# Сортируем по law_and_order_index убыванию
-countries.sort(key=lambda x: x.get("law_and_order_index", 0), reverse=True)
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2, ensure_ascii=False)
 
-print(f"  Итого стран: {len(countries)}")
-print("\n  Первые 5:")
-for c in countries[:5]:
-    print(f"    {c}")
-print("\n  Последние 5:")
-for c in countries[-5:]:
-    print(f"    {c}")
-
-# Показываем записи где есть только один из двух индексов
-only_safe = [c for c in countries if "law_and_order_index" not in c]
-only_law  = [c for c in countries if "safe_walking_night_pct" not in c]
-if only_safe:
-    print(f"\n  Только safe_walking (нет law_and_order): {[c['country'] for c in only_safe]}")
-if only_law:
-    print(f"\n  Только law_and_order (нет safe_walking): {[c['country'] for c in only_law]}")
+    print(f"  ✓ Сохранено: {args.output}")
+    print(f"  ✓ Стран: {len(countries)}")
+    print("\nГотово!")
 
 
-# ─── Шаг 5: Сохраняем в JSON ─────────────────────────────────────────────────
-print("\nШаг 5: Сохраняем в JSON...")
-
-result = {
-    "source": "Gallup Global Safety Report 2025",
-    "url": "https://www.gallup.com/analytics/356996/gallup-global-law-and-order.aspx",
-    "provider": "Gallup",
-    "year": 2024,
-    "note": (
-        "law_and_order_index: 0-100 (выше = безопаснее), составной индекс из 4 вопросов. "
-        "safe_walking_night_pct: % людей ответивших 'да' на вопрос о безопасности ночью."
-    ),
-    "total_countries": len(countries),
-    "countries": countries,
-}
-
-OUTPUT_FILE = "gallup_data.json"
-
-with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-    json.dump(result, f, indent=2, ensure_ascii=False)
-
-print(f"  ✓ Сохранено: {OUTPUT_FILE}")
-print(f"  ✓ Стран: {len(countries)}")
-print("\nГотово!")
+if __name__ == "__main__":
+    main()
