@@ -38,7 +38,10 @@ def extract_table(all_lines, value_re, value_cast):
     results = {}
 
     for line in all_lines:
-        parts = re.split(r'(?<=\d)\s+(?=[A-Z])', line)
+        # Law and Order lines look like "Tajikistan 97 Indonesia 89" — split after a digit.
+        # Safe to Walk lines look like "Singapore 98% Egypt 82%" — the % breaks the digit
+        # lookbehind, so also split after "%" before the next country name.
+        parts = re.split(r'(?:(?<=\d)|(?<=%))\s+(?=[A-Z])', line)
 
         for part in parts:
             part = part.strip()

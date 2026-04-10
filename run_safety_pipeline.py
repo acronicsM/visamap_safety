@@ -1,12 +1,12 @@
 """
-Единый запуск: кэш справочника стран, четыре парсера, объединённый JSON.
+Единый запуск: кэш справочника стран, четыре парсера, объединённый JSON и единый индекс безопасности.
 
 Требует: API_COUNTRIES_URL в .env (или переменных окружения), либо готовый --reference-json.
 PDF-пути: GALLUP_DATA_FILE, WOMEN_PEACE_SECURITY_INDEX_FILE.
 
-После успешного merge удаляются промежуточные gallup/gpi/numbeo/wps *_data.json в корне репо
-и файл кэша справочника, если он лежит внутри этого каталога (например reference_countries.json).
-Внешний путь из --reference-json вне репозитория не трогаем.
+После успешного merge по умолчанию удаляются промежуточные gallup/gpi/numbeo/wps *_data.json
+и кэш справочника внутри корня репо (см. SAFETY_PIPELINE_DELETE_INTERMEDIATE и --keep-intermediate).
+Внешний --reference-json вне репозитория не трогаем.
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ from country_reference import (
     display_name_for_iso2,
     load_reference_from_path,
 )
+from safety_composite import enrich_merged_with_safety_index
 
 ROOT = Path(__file__).resolve().parent
 
@@ -52,6 +53,14 @@ def _unlink_if_exists(path: Path) -> None:
         path.unlink(missing_ok=True)
     except OSError as e:
         print(f"Предупреждение: не удалось удалить {path}: {e}", file=sys.stderr)
+
+
+def _env_delete_intermediate_enabled() -> bool:
+    """SAFETY_PIPELINE_DELETE_INTERMEDIATE: 1/true (по умолчанию) — удалять; 0/false — оставить."""
+    raw = os.environ.get("SAFETY_PIPELINE_DELETE_INTERMEDIATE", "1").strip().lower()
+    if raw in ("0", "false", "no", "off", "n"):
+        return False
+    return True
 
 
 FLAT_KEYS = {
@@ -201,6 +210,21 @@ def main() -> None:
         action="store_true",
         help="Не вызывать API: использовать только существующий --reference-json",
     )
+    parser.add_argument(
+        "--keep-intermediate",
+        action="store_true",
+        help="Не удалять после merge промежуточные *_data.json и кэш справочника в корне репо",
+    )
+    parser.add_argument(
+        "--safety-config",
+        default=None,
+        help="JSON весов и границ (по умолчанию env SAFETY_INDEX_CONFIG_FILE или safety_index_config.json)",
+    )
+    parser.add_argument(
+        "--safety-manual-scores",
+        default=None,
+        help="JSON ручных оценок (по умолчанию env SAFETY_MANUAL_SCORES_FILE или safety_manual_scores.json)",
+    )
     args = parser.parse_args()
 
     load_dotenv(ROOT / ".env")
@@ -257,20 +281,38 @@ def main() -> None:
         for sid, fname in SOURCE_OUTPUTS.items()
     }
     merged = merge_loaded(loaded, ref, manual_path)
+
+    safety_cfg_arg = args.safety_config or os.environ.get("SAFETY_INDEX_CONFIG_FILE")
+    safety_manual_arg = args.safety_manual_scores or os.environ.get("SAFETY_MANUAL_SCORES_FILE")
+    safety_config_path = Path(safety_cfg_arg) if safety_cfg_arg else ROOT / "safety_index_config.json"
+    safety_manual_path = Path(safety_manual_arg) if safety_manual_arg else ROOT / "safety_manual_scores.json"
+    enrich_merged_with_safety_index(
+        merged,
+        config_path=safety_config_path,
+        manual_path=safety_manual_path,
+    )
+
     with open(merged_out, "w", encoding="utf-8") as f:
         json.dump(merged, f, indent=2, ensure_ascii=False)
 
     print(f"✓ Объединённый файл: {merged_out}")
     print(f"  Стран с iso2: {len(merged['by_iso2'])}, unmatched: {len(merged['unmatched'])}")
 
-    for fname in SOURCE_OUTPUTS.values():
-        _unlink_if_exists(ROOT / fname)
-    print("  Удалены промежуточные JSON:", ", ".join(SOURCE_OUTPUTS.values()))
+    delete_intermediate = _env_delete_intermediate_enabled() and not args.keep_intermediate
+    if delete_intermediate:
+        for fname in SOURCE_OUTPUTS.values():
+            _unlink_if_exists(ROOT / fname)
+        print("  Удалены промежуточные JSON:", ", ".join(SOURCE_OUTPUTS.values()))
 
-    ref_cache_path = Path(ref_path_arg).resolve()
-    if ref_cache_path.is_file() and _is_under_directory(ROOT, ref_cache_path):
-        _unlink_if_exists(ref_cache_path)
-        print(f"  Удалён кэш справочника: {ref_cache_path}")
+        ref_cache_path = Path(ref_path_arg).resolve()
+        if ref_cache_path.is_file() and _is_under_directory(ROOT, ref_cache_path):
+            _unlink_if_exists(ref_cache_path)
+            print(f"  Удалён кэш справочника: {ref_cache_path}")
+    else:
+        print(
+            "  Промежуточные файлы не удалены "
+            "(--keep-intermediate или SAFETY_PIPELINE_DELETE_INTERMEDIATE=0/false/no)"
+        )
 
 
 if __name__ == "__main__":
