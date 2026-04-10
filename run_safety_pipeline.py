@@ -7,6 +7,14 @@ PDF-пути: GALLUP_DATA_FILE, WOMEN_PEACE_SECURITY_INDEX_FILE.
 После успешного merge по умолчанию удаляются промежуточные gallup/gpi/numbeo/wps *_data.json
 и кэш справочника внутри корня репо (см. SAFETY_PIPELINE_DELETE_INTERMEDIATE и --keep-intermediate).
 Внешний --reference-json вне репозитория не трогаем.
+
+Минимальный вывод в --merged-out (только {"by_iso2": {ISO2: {"safety_final_score": ...}}}):
+флаг --minimal-by-iso2-only или SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY=1 в .env.
+Отмена полным JSON: --full-merged-out.
+
+Отправка итога на сервер вместо записи MERGED_OUTPUT_FILE: --push-safety-final-scores.
+Нужны SAFETY_FINAL_SCORES_PUT_URL (полный URL) и SAFETY_FINAL_SCORES_X_API_KEY (заголовок X-Api-Key);
+PUT, Content-Type: application/json, тело как у сформированного merged JSON.
 """
 
 from __future__ import annotations
@@ -19,6 +27,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import requests
 from dotenv import load_dotenv
 
 from country_reference import (
@@ -61,6 +70,51 @@ def _env_delete_intermediate_enabled() -> bool:
     if raw in ("0", "false", "no", "off", "n"):
         return False
     return True
+
+
+def _env_merged_minimal_by_iso2_enabled() -> bool:
+    """SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY: 1/true — в merged-out только by_iso2 → safety_final_score."""
+    raw = os.environ.get("SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY", "").strip().lower()
+    return raw in ("1", "true", "yes", "on", "y")
+
+
+def _push_safety_final_scores(out_doc: dict) -> None:
+    url = (os.environ.get("SAFETY_FINAL_SCORES_PUT_URL") or "").strip()
+    api_key = (os.environ.get("SAFETY_FINAL_SCORES_X_API_KEY") or "").strip()
+    if not url:
+        print(
+            "Для --push-safety-final-scores задайте SAFETY_FINAL_SCORES_PUT_URL в .env",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    if not api_key:
+        print(
+            "Для --push-safety-final-scores задайте SAFETY_FINAL_SCORES_X_API_KEY в .env",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    headers = {
+        "Content-Type": "application/json",
+        "X-Api-Key": api_key,
+    }
+    try:
+        r = requests.put(url, json=out_doc, headers=headers, timeout=120)
+    except requests.RequestException as e:
+        print(f"Ошибка запроса PUT: {e}", file=sys.stderr)
+        sys.exit(1)
+    if r.status_code >= 400:
+        body_preview = (r.text or "")[:2000]
+        print(
+            f"PUT завершился с кодом {r.status_code}. Тело ответа:\n{body_preview}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    preview = (r.text or "").strip()
+    if preview:
+        short = preview if len(preview) <= 500 else preview[:500] + "…"
+        print(f"✓ Отправлено PUT {url} → HTTP {r.status_code}\n  Ответ: {short}")
+    else:
+        print(f"✓ Отправлено PUT {url} → HTTP {r.status_code}")
 
 
 FLAT_KEYS = {
@@ -225,9 +279,32 @@ def main() -> None:
         default=None,
         help="JSON ручных оценок (по умолчанию env SAFETY_MANUAL_SCORES_FILE или safety_manual_scores.json)",
     )
+    parser.add_argument(
+        "--minimal-by-iso2-only",
+        action="store_true",
+        help="В merged-out только by_iso2 → safety_final_score (или через env SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY)",
+    )
+    parser.add_argument(
+        "--full-merged-out",
+        action="store_true",
+        help="Всегда полный merged в --merged-out (отменяет SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY)",
+    )
+    parser.add_argument(
+        "--push-safety-final-scores",
+        action="store_true",
+        help=(
+            "Не писать MERGED_OUTPUT_FILE: отправить итог PUT на SAFETY_FINAL_SCORES_PUT_URL "
+            "(заголовок X-Api-Key из SAFETY_FINAL_SCORES_X_API_KEY)"
+        ),
+    )
     args = parser.parse_args()
 
     load_dotenv(ROOT / ".env")
+
+    merged_out_minimal = (
+        not args.full_merged_out
+        and (args.minimal_by_iso2_only or _env_merged_minimal_by_iso2_enabled())
+    )
 
     ref_out = Path(args.reference_out or os.environ.get("REFERENCE_COUNTRIES_FILE") or ROOT / "reference_countries.json")
     merged_out = Path(args.merged_out or os.environ.get("MERGED_OUTPUT_FILE") or ROOT / "safety_merged.json")
@@ -292,10 +369,28 @@ def main() -> None:
         manual_path=safety_manual_path,
     )
 
-    with open(merged_out, "w", encoding="utf-8") as f:
-        json.dump(merged, f, indent=2, ensure_ascii=False)
+    if merged_out_minimal:
+        by_full = merged.get("by_iso2") or {}
+        out_doc = {
+            "by_iso2": {
+                iso: {"safety_final_score": row.get("safety_final_score")}
+                for iso, row in sorted(by_full.items())
+            },
+        }
+        dump_kw: dict = {"ensure_ascii": False, "separators": (",", ":")}
+    else:
+        out_doc = merged
+        dump_kw = {"ensure_ascii": False, "indent": 2}
 
-    print(f"✓ Объединённый файл: {merged_out}")
+    if args.push_safety_final_scores:
+        _push_safety_final_scores(out_doc)
+    else:
+        with open(merged_out, "w", encoding="utf-8") as f:
+            json.dump(out_doc, f, **dump_kw)
+        print(f"✓ Объединённый файл: {merged_out}")
+
+    if merged_out_minimal:
+        print("  Режим: только by_iso2 → safety_final_score (компактный JSON)")
     print(f"  Стран с iso2: {len(merged['by_iso2'])}, unmatched: {len(merged['unmatched'])}")
 
     delete_intermediate = _env_delete_intermediate_enabled() and not args.keep_intermediate

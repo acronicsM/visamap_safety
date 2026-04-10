@@ -1,4 +1,24 @@
 {
-  "aliases_to_iso2": {},
+  "aliases_to_iso2": {
+    "Russian Federation": "RU",
+    "Hong Kong, S.A.R. of China": "HK",
+    "Czech Republic": "CZ",
+    "Northern Cyprus": "CY",
+    "Lao People's Democratic Republic": "LA",
+    "Moldova, Republic of": "MD",
+    "Cote d'Ivoire": "CI",
+    "State of Palestine": "PS",
+    "Democratic Republic of the Congo": "CD",
+    "The Gambia": "GM",
+    "Sudan": "SD",
+    "Us Virgin Islands": "VI",
+    "Viet Nam": "VN",
+    "Lao PDR": "LA",
+    "Federated States of Micronesia": "FM",
+    "Congo, Dem. Rep.": "CD",
+    "Syrian Arab Republic": "SY",
+    "Syrian Arab Rep.": "SY",
+    "Central African Rep.": "CF"
+  },
   "iso2_to_name": {}
 }
