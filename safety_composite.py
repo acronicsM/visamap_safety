@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import json
+import statistics
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,6 +26,9 @@ NORM_KEYS = {
     "numbeo": "safety_norm_numbeo",
     "wps": "safety_norm_wps",
 }
+
+# Медиана по фактически присутствующим нормализованным метрикам источников (не композит).
+SAFETY_NORM_MEDIAN_FIELD = "safety_norm_median"
 
 METRIC_ORDER = (
     ("gallup_lo", ROW_GALLUP_LO),
@@ -273,6 +277,7 @@ def enrich_merged_with_safety_index(
 
     for iso, row in by_iso2.items():
         for k in list(NORM_KEYS.values()) + [
+            SAFETY_NORM_MEDIAN_FIELD,
             "safety_composite_score",
             "safety_final_score",
             "safety_weights_used",
@@ -284,6 +289,9 @@ def enrich_merged_with_safety_index(
         composite, norms, w_used = compute_row_scores(row, weights, bounds)
         for nk, nv in norms.items():
             row[nk] = nv
+        norm_vals = list(norms.values())
+        if norm_vals:
+            row[SAFETY_NORM_MEDIAN_FIELD] = round(float(statistics.median(norm_vals)), 4)
         if composite is not None:
             row["safety_composite_score"] = composite
         if w_used:

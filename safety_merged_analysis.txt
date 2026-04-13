@@ -1,0 +1,686 @@
+Источник merged: C:\visamap_safety\safety_merged.json
+
+unmatched: всего 2
+  [1] wps | percent (from
+  [2] wps | for detailed results). The range of scores, from
+
+Нормализованные индексы (safety_norm_*): порог >= 20.00 (20% шкалы 0–100), страны с >= 2 нормами; SAFETY_NORM_SPREAD_MODE='minmax': размах max−min по нормам источников (safety_norm_*), без safety_norm_median.
+В merged: safety_norm_median — медиана по тем же нормам (для справки, в размах не участвует).
+Ожидаемые ключи (из конфига): safety_norm_gallup_lo, safety_norm_gallup_night, safety_norm_gpi, safety_norm_numbeo, safety_norm_wps
+Стран с размахом >= порога: 104
+
+        field                      value
+        ------------------------   ----------
+
+  LR   min=0   max=68.7   minmax=68.7   mean=39.23   median=44.1   spread_metric=68.7
+        safety_norm_gallup_lo          0.0000
+        safety_norm_gallup_night      37.0000
+        safety_norm_gpi               68.7000
+        safety_norm_wps               51.2000
+
+  SL   min=11.76   max=70.43   minmax=58.67   mean=49.07   median=57.05   spread_metric=58.67
+        safety_norm_gallup_lo         11.7647
+        safety_norm_gallup_night      54.0000
+        safety_norm_gpi               70.4333
+        safety_norm_wps               60.1000
+
+  RU   min=18.63   max=71.8   minmax=53.17   mean=56.01   median=61.8   spread_metric=53.17
+        safety_norm_gallup_lo         58.8235
+        safety_norm_gallup_night      69.0000
+        safety_norm_gpi               18.6333
+        safety_norm_numbeo            61.8000
+        safety_norm_wps               71.8000
+
+  BW   min=25.49   max=75.23   minmax=49.74   mean=49.76   median=48.3   spread_metric=49.74
+        safety_norm_gallup_lo         25.4902
+        safety_norm_gallup_night      34.0000
+        safety_norm_gpi               75.2333
+        safety_norm_numbeo            48.3000
+        safety_norm_wps               65.8000
+
+  PE   min=23.53   max=70.1   minmax=46.57   mean=46.79   median=43   spread_metric=46.57
+        safety_norm_gallup_lo         23.5294
+        safety_norm_gallup_night      43.0000
+        safety_norm_gpi               64.2333
+        safety_norm_numbeo            33.1000
+        safety_norm_wps               70.1000
+
+  UA   min=18.87   max=64.5   minmax=45.63   mean=49.5   median=53.1   spread_metric=45.63
+        safety_norm_gallup_lo         49.0196
+        safety_norm_gallup_night      62.0000
+        safety_norm_gpi               18.8667
+        safety_norm_numbeo            53.1000
+        safety_norm_wps               64.5000
+
+  VE   min=19.6   max=63.8   minmax=44.2   mean=45.83   median=43.6   spread_metric=44.2
+        safety_norm_gallup_lo         43.1373
+        safety_norm_gallup_night      59.0000
+        safety_norm_gpi               43.6000
+        safety_norm_numbeo            19.6000
+        safety_norm_wps               63.8000
+
+  GY   min=33.1   max=77   minmax=43.9   mean=57.27   median=61.7   spread_metric=43.9
+        safety_norm_gpi               61.7000
+        safety_norm_numbeo            33.1000
+        safety_norm_wps               77.0000
+
+  SV   min=43.6   max=87   minmax=43.4   mean=68.45   median=69.1   spread_metric=43.4
+        safety_norm_gallup_lo         80.3922
+        safety_norm_gallup_night      87.0000
+        safety_norm_gpi               62.1333
+        safety_norm_numbeo            43.6000
+        safety_norm_wps               69.1000
+
+  BO   min=27.45   max=70.1   minmax=42.65   mean=49.77   median=49   spread_metric=42.65
+        safety_norm_gallup_lo         27.4510
+        safety_norm_gallup_night      49.0000
+        safety_norm_gpi               66.5000
+        safety_norm_numbeo            35.8000
+        safety_norm_wps               70.1000
+
+  AR   min=36.8   max=79.1   minmax=42.3   mean=55.5   median=48   spread_metric=42.3
+        safety_norm_gallup_lo         39.2157
+        safety_norm_gallup_night      48.0000
+        safety_norm_gpi               74.4000
+        safety_norm_numbeo            36.8000
+        safety_norm_wps               79.1000
+
+  FR   min=44.2   max=86.4   minmax=42.2   mean=68.39   median=70.59   spread_metric=42.2
+        safety_norm_gallup_lo         70.5882
+        safety_norm_gallup_night      73.0000
+        safety_norm_gpi               67.7667
+        safety_norm_numbeo            44.2000
+        safety_norm_wps               86.4000
+
+  ZA   min=23.53   max=64.8   minmax=41.27   mean=40.39   median=33   spread_metric=41.27
+        safety_norm_gallup_lo         23.5294
+        safety_norm_gallup_night      33.0000
+        safety_norm_gpi               55.1000
+        safety_norm_numbeo            25.5000
+        safety_norm_wps               64.8000
+
+  IL   min=29.73   max=71   minmax=41.27   mean=60.67   median=68.2   spread_metric=41.27
+        safety_norm_gallup_lo         64.7059
+        safety_norm_gallup_night      71.0000
+        safety_norm_gpi               29.7333
+        safety_norm_numbeo            68.2000
+        safety_norm_wps               69.7000
+
+  CG   min=21.57   max=62.27   minmax=40.7   mean=47.28   median=52.65   spread_metric=40.7
+        safety_norm_gallup_lo         21.5686
+        safety_norm_gallup_night      47.0000
+        safety_norm_gpi               62.2667
+        safety_norm_wps               58.3000
+
+  GA   min=27.45   max=67.9   minmax=40.45   mean=49.52   median=51.37   spread_metric=40.45
+        safety_norm_gallup_lo         27.4510
+        safety_norm_gallup_night      44.0000
+        safety_norm_gpi               58.7333
+        safety_norm_wps               67.9000
+
+  BE   min=50.8   max=91.2   minmax=40.4   mean=74.43   median=74   spread_metric=40.4
+        safety_norm_gallup_lo         72.5490
+        safety_norm_gallup_night      74.0000
+        safety_norm_gpi               83.6000
+        safety_norm_numbeo            50.8000
+        safety_norm_wps               91.2000
+
+  IE   min=51   max=91.33   minmax=40.33   mean=76.39   median=76   spread_metric=40.33
+        safety_norm_gallup_lo         74.5098
+        safety_norm_gallup_night      76.0000
+        safety_norm_gpi               91.3333
+        safety_norm_numbeo            51.0000
+        safety_norm_wps               89.1000
+
+  SE   min=52.1   max=92.4   minmax=40.3   mean=75.67   median=76.47   spread_metric=40.3
+        safety_norm_gallup_lo         76.4706
+        safety_norm_gallup_night      81.0000
+        safety_norm_gpi               76.3667
+        safety_norm_numbeo            52.1000
+        safety_norm_wps               92.4000
+
+  GM   min=31.37   max=71.5   minmax=40.13   mean=50.92   median=50.4   spread_metric=40.13
+        safety_norm_gallup_lo         31.3725
+        safety_norm_gallup_night      48.0000
+        safety_norm_gpi               71.5000
+        safety_norm_wps               52.8000
+
+  ZM   min=29.41   max=69.53   minmax=40.12   mean=50.23   median=53.6   spread_metric=40.12
+        safety_norm_gallup_lo         29.4118
+        safety_norm_gallup_night      42.0000
+        safety_norm_gpi               69.5333
+        safety_norm_numbeo            53.6000
+        safety_norm_wps               56.6000
+
+  PG   min=19.1   max=59   minmax=39.9   mean=42.93   median=50.7   spread_metric=39.9
+        safety_norm_gpi               59.0000
+        safety_norm_numbeo            19.1000
+        safety_norm_wps               50.7000
+
+  TT   min=28.8   max=68.5   minmax=39.7   mean=49.13   median=49   spread_metric=39.7
+        safety_norm_gallup_lo         33.3333
+        safety_norm_gallup_night      49.0000
+        safety_norm_gpi               66.0000
+        safety_norm_numbeo            28.8000
+        safety_norm_wps               68.5000
+
+  NZ   min=51.2   max=90.6   minmax=39.4   mean=71.28   median=64   spread_metric=39.4
+        safety_norm_gallup_lo         60.7843
+        safety_norm_gallup_night      64.0000
+        safety_norm_gpi               90.6000
+        safety_norm_numbeo            51.2000
+        safety_norm_wps               89.8000
+
+  IQ   min=37.93   max=77   minmax=39.07   mean=59.99   median=59.5   spread_metric=39.07
+        safety_norm_gallup_lo         74.5098
+        safety_norm_gallup_night      77.0000
+        safety_norm_gpi               37.9333
+        safety_norm_numbeo            59.5000
+        safety_norm_wps               51.0000
+
+  UG   min=21.57   max=59.43   minmax=37.86   mean=46.72   median=48   spread_metric=37.86
+        safety_norm_gallup_lo         21.5686
+        safety_norm_gallup_night      48.0000
+        safety_norm_gpi               59.4333
+        safety_norm_numbeo            45.9000
+        safety_norm_wps               58.7000
+
+  ML   min=31.3   max=69   minmax=37.7   mean=49.77   median=49.39   spread_metric=37.7
+        safety_norm_gallup_lo         50.9804
+        safety_norm_gallup_night      69.0000
+        safety_norm_gpi               31.3000
+        safety_norm_wps               47.8000
+
+  JM   min=32.6   max=70.3   minmax=37.7   mean=56   median=65.1   spread_metric=37.7
+        safety_norm_gpi               65.1000
+        safety_norm_numbeo            32.6000
+        safety_norm_wps               70.3000
+
+  NA   min=36.2   max=73.7   minmax=37.5   mean=53.16   median=50   spread_metric=37.5
+        safety_norm_gallup_lo         45.0980
+        safety_norm_gallup_night      50.0000
+        safety_norm_gpi               73.7000
+        safety_norm_numbeo            36.2000
+        safety_norm_wps               60.8000
+
+  AU   min=52.5   max=89.6   minmax=37.1   mean=70.41   median=66   spread_metric=37.1
+        safety_norm_gallup_lo         60.7843
+        safety_norm_gallup_night      66.0000
+        safety_norm_gpi               83.1667
+        safety_norm_numbeo            52.5000
+        safety_norm_wps               89.6000
+
+  MW   min=31.37   max=68.17   minmax=36.79   mean=50.11   median=50.45   spread_metric=36.79
+        safety_norm_gallup_lo         31.3725
+        safety_norm_gallup_night      46.0000
+        safety_norm_gpi               68.1667
+        safety_norm_wps               54.9000
+
+  CL   min=37.25   max=73.9   minmax=36.65   mean=51.9   median=39.3   spread_metric=36.65
+        safety_norm_gallup_lo         37.2549
+        safety_norm_gallup_night      39.0000
+        safety_norm_gpi               70.0333
+        safety_norm_numbeo            39.3000
+        safety_norm_wps               73.9000
+
+  IR   min=41.67   max=78   minmax=36.33   mean=59.66   median=60.8   spread_metric=36.33
+        safety_norm_gallup_lo         68.6275
+        safety_norm_gallup_night      78.0000
+        safety_norm_gpi               41.6667
+        safety_norm_numbeo            49.2000
+        safety_norm_wps               60.8000
+
+  CR   min=46.1   max=82.4   minmax=36.3   mean=61.27   median=53   spread_metric=36.3
+        safety_norm_gallup_lo         52.9412
+        safety_norm_gallup_night      53.0000
+        safety_norm_gpi               71.9000
+        safety_norm_numbeo            46.1000
+        safety_norm_wps               82.4000
+
+  PY   min=40.5   max=76.8   minmax=36.3   mean=56.53   median=51   spread_metric=36.3
+        safety_norm_gallup_lo         47.0588
+        safety_norm_gallup_night      51.0000
+        safety_norm_gpi               67.3000
+        safety_norm_numbeo            40.5000
+        safety_norm_wps               76.8000
+
+  EC   min=25.49   max=61.2   minmax=35.71   mean=42.83   median=38.1   spread_metric=35.71
+        safety_norm_gallup_lo         25.4902
+        safety_norm_gallup_night      38.0000
+        safety_norm_gpi               51.3667
+        safety_norm_numbeo            38.1000
+        safety_norm_wps               61.2000
+
+  BD   min=38.4   max=74   minmax=35.6   mean=55.59   median=56.07   spread_metric=35.6
+        safety_norm_gallup_lo         56.8627
+        safety_norm_gallup_night      74.0000
+        safety_norm_gpi               56.0667
+        safety_norm_numbeo            38.4000
+        safety_norm_wps               52.6000
+
+  MN   min=45.1   max=79.9   minmax=34.8   mean=60.75   median=53   spread_metric=34.8
+        safety_norm_gallup_lo         45.0980
+        safety_norm_gallup_night      53.0000
+        safety_norm_gpi               76.0333
+        safety_norm_numbeo            49.7000
+        safety_norm_wps               79.9000
+
+  GB   min=51.7   max=86.4   minmax=34.7   mean=72.32   median=76   spread_metric=34.7
+        safety_norm_gallup_lo         68.6275
+        safety_norm_gallup_night      76.0000
+        safety_norm_gpi               78.8667
+        safety_norm_numbeo            51.7000
+        safety_norm_wps               86.4000
+
+  UY   min=47.5   max=82.2   minmax=34.7   mean=60.91   median=50.98   spread_metric=34.7
+        safety_norm_gallup_lo         50.9804
+        safety_norm_gallup_night      50.0000
+        safety_norm_gpi               73.8667
+        safety_norm_numbeo            47.5000
+        safety_norm_wps               82.2000
+
+  BF   min=32.8   max=67   minmax=34.2   mean=53.31   median=56.72   spread_metric=34.2
+        safety_norm_gallup_lo         62.7451
+        safety_norm_gallup_night      67.0000
+        safety_norm_gpi               32.8000
+        safety_norm_wps               50.7000
+
+  CA   min=54.4   max=88.5   minmax=34.1   mean=73.25   median=75   spread_metric=34.1
+        safety_norm_gallup_lo         64.7059
+        safety_norm_gallup_night      75.0000
+        safety_norm_gpi               83.6333
+        safety_norm_numbeo            54.4000
+        safety_norm_wps               88.5000
+
+  US   min=50.8   max=84   minmax=33.2   mean=65.27   median=68.63   spread_metric=33.2
+        safety_norm_gallup_lo         68.6275
+        safety_norm_gallup_night      71.0000
+        safety_norm_gpi               51.9000
+        safety_norm_numbeo            50.8000
+        safety_norm_wps               84.0000
+
+  SD   min=22.57   max=55.6   minmax=33.03   mean=39.29   median=39.7   spread_metric=33.03
+        safety_norm_gpi               22.5667
+        safety_norm_numbeo            55.6000
+        safety_norm_wps               39.7000
+
+  MG   min=37.25   max=70.17   minmax=32.91   mean=49.26   median=44.8   spread_metric=32.91
+        safety_norm_gallup_lo         37.2549
+        safety_norm_gallup_night      43.0000
+        safety_norm_gpi               70.1667
+        safety_norm_wps               46.6000
+
+  AO   min=34.5   max=67.1   minmax=32.6   mean=53.9   median=60.1   spread_metric=32.6
+        safety_norm_gpi               67.1000
+        safety_norm_numbeo            34.5000
+        safety_norm_wps               60.1000
+
+  MY   min=52   max=84.37   minmax=32.37   mean=66.97   median=66.67   spread_metric=32.37
+        safety_norm_gallup_lo         66.6667
+        safety_norm_gallup_night      58.0000
+        safety_norm_gpi               84.3667
+        safety_norm_numbeo            52.0000
+        safety_norm_wps               73.8000
+
+  PR   min=38.6   max=70.7   minmax=32.1   mean=54.65   median=54.65   spread_metric=32.1
+        safety_norm_numbeo            38.6000
+        safety_norm_wps               70.7000
+
+  DZ   min=47   max=78   minmax=31   mean=65.77   median=65.27   spread_metric=31
+        safety_norm_gallup_lo         76.4706
+        safety_norm_gallup_night      78.0000
+        safety_norm_gpi               65.2667
+        safety_norm_numbeo            47.0000
+        safety_norm_wps               62.1000
+
+  MU   min=49.8   max=80.47   minmax=30.67   mean=64.58   median=62.75   spread_metric=30.67
+        safety_norm_gallup_lo         62.7451
+        safety_norm_gallup_night      62.0000
+        safety_norm_gpi               80.4667
+        safety_norm_numbeo            49.8000
+        safety_norm_wps               67.9000
+
+  XK   min=58.4   max=89   minmax=30.6   mean=75.07   median=70   spread_metric=30.6
+        safety_norm_gallup_lo         88.2353
+        safety_norm_gallup_night      89.0000
+        safety_norm_gpi               69.7333
+        safety_norm_numbeo            58.4000
+        safety_norm_wps               70.0000
+
+  CN   min=63.57   max=94   minmax=30.43   mean=77.85   median=76.9   spread_metric=30.43
+        safety_norm_gallup_lo         86.2745
+        safety_norm_gallup_night      94.0000
+        safety_norm_gpi               63.5667
+        safety_norm_numbeo            76.9000
+        safety_norm_wps               68.5000
+
+  SZ   min=33.33   max=63.53   minmax=30.2   mean=48.12   median=47.8   spread_metric=30.2
+        safety_norm_gallup_lo         33.3333
+        safety_norm_gallup_night      40.0000
+        safety_norm_gpi               63.5333
+        safety_norm_wps               55.6000
+
+  TD   min=17.65   max=47.6   minmax=29.95   mean=38.29   median=43.95   spread_metric=29.95
+        safety_norm_gallup_lo         17.6471
+        safety_norm_gallup_night      41.0000
+        safety_norm_gpi               46.9000
+        safety_norm_wps               47.6000
+
+  HN   min=28.1   max=58   minmax=29.9   mean=48.09   median=55.1   spread_metric=29.9
+        safety_norm_gallup_lo         43.1373
+        safety_norm_gallup_night      58.0000
+        safety_norm_gpi               55.1000
+        safety_norm_numbeo            28.1000
+        safety_norm_wps               56.1000
+
+  FJ   min=43.6   max=73.1   minmax=29.5   mean=58.35   median=58.35   spread_metric=29.5
+        safety_norm_numbeo            43.6000
+        safety_norm_wps               73.1000
+
+  ID   min=53.6   max=83   minmax=29.4   mean=71.33   median=73.8   spread_metric=29.4
+        safety_norm_gallup_lo         78.4314
+        safety_norm_gallup_night      83.0000
+        safety_norm_gpi               73.8000
+        safety_norm_numbeo            53.6000
+        safety_norm_wps               67.8000
+
+  KE   min=25.49   max=54.2   minmax=28.71   mean=45.04   median=47   spread_metric=28.71
+        safety_norm_gallup_lo         25.4902
+        safety_norm_gallup_night      47.0000
+        safety_norm_gpi               53.6000
+        safety_norm_numbeo            44.9000
+        safety_norm_wps               54.2000
+
+  EG   min=53.6   max=82   minmax=28.4   mean=66.65   median=61.7   spread_metric=28.4
+        safety_norm_gallup_lo         74.5098
+        safety_norm_gallup_night      82.0000
+        safety_norm_gpi               61.4333
+        safety_norm_numbeo            53.6000
+        safety_norm_wps               61.7000
+
+  KG   min=48.6   max=77   minmax=28.4   mean=66.59   median=69.7   spread_metric=28.4
+        safety_norm_gallup_lo         70.5882
+        safety_norm_gallup_night      77.0000
+        safety_norm_gpi               67.0667
+        safety_norm_numbeo            48.6000
+        safety_norm_wps               69.7000
+
+  IT   min=52.7   max=81.1   minmax=28.4   mean=67.29   median=64.71   spread_metric=28.4
+        safety_norm_gallup_lo         64.7059
+        safety_norm_gallup_night      60.0000
+        safety_norm_gpi               77.9333
+        safety_norm_numbeo            52.7000
+        safety_norm_wps               81.1000
+
+  DO   min=39.22   max=67.5   minmax=28.28   mean=52.1   median=47   spread_metric=28.28
+        safety_norm_gallup_lo         39.2157
+        safety_norm_gallup_night      47.0000
+        safety_norm_gpi               66.8000
+        safety_norm_numbeo            40.0000
+        safety_norm_wps               67.5000
+
+  TJ   min=66.8   max=95   minmax=28.2   mean=81.1   median=81.31   spread_metric=28.2
+        safety_norm_gallup_lo         94.1176
+        safety_norm_gallup_night      95.0000
+        safety_norm_gpi               66.8000
+        safety_norm_wps               68.5000
+
+  GR   min=47.06   max=75.2   minmax=28.14   mean=62.92   median=64   spread_metric=28.14
+        safety_norm_gallup_lo         47.0588
+        safety_norm_gallup_night      64.0000
+        safety_norm_gpi               74.5333
+        safety_norm_numbeo            53.8000
+        safety_norm_wps               75.2000
+
+  VN   min=59.9   max=88   minmax=28.1   mean=76.45   median=75.97   spread_metric=28.1
+        safety_norm_gallup_lo         86.2745
+        safety_norm_gallup_night      88.0000
+        safety_norm_gpi               75.9667
+        safety_norm_numbeo            59.9000
+        safety_norm_wps               72.1000
+
+  LY   min=44.2   max=72   minmax=27.8   mean=57.7   median=60.78   spread_metric=27.8
+        safety_norm_gallup_lo         60.7843
+        safety_norm_gallup_night      72.0000
+        safety_norm_gpi               50.7333
+        safety_norm_numbeo            44.2000
+        safety_norm_wps               60.8000
+
+  NG   min=25.49   max=53   minmax=27.51   mean=39.9   median=37.7   spread_metric=27.51
+        safety_norm_gallup_lo         25.4902
+        safety_norm_gallup_night      53.0000
+        safety_norm_gpi               37.7000
+        safety_norm_numbeo            33.8000
+        safety_norm_wps               49.5000
+
+  SA   min=65.5   max=93   minmax=27.5   mean=78.29   median=76.7   spread_metric=27.5
+        safety_norm_gallup_lo         82.3529
+        safety_norm_gallup_night      93.0000
+        safety_norm_gpi               65.5000
+        safety_norm_numbeo            76.7000
+        safety_norm_wps               73.9000
+
+  LS   min=34   max=61.4   minmax=27.4   mean=47.12   median=46.53   spread_metric=27.4
+        safety_norm_gallup_lo         35.2941
+        safety_norm_gallup_night      34.0000
+        safety_norm_gpi               57.7667
+        safety_norm_wps               61.4000
+
+  BR   min=36   max=63.2   minmax=27.2   mean=50.03   median=50.93   spread_metric=27.2
+        safety_norm_gallup_lo         49.0196
+        safety_norm_gallup_night      51.0000
+        safety_norm_gpi               50.9333
+        safety_norm_numbeo            36.0000
+        safety_norm_wps               63.2000
+
+  MT   min=57   max=84.1   minmax=27.1   mean=69.69   median=68.83   spread_metric=27.1
+        safety_norm_gallup_lo         66.6667
+        safety_norm_gallup_night      71.0000
+        safety_norm_numbeo            57.0000
+        safety_norm_wps               84.1000
+
+  MR   min=37.25   max=64   minmax=26.75   mean=52.16   median=53.68   spread_metric=26.75
+        safety_norm_gallup_lo         37.2549
+        safety_norm_gallup_night      64.0000
+        safety_norm_gpi               59.8667
+        safety_norm_wps               47.5000
+
+  MD   min=55.4   max=82.1   minmax=26.7   mean=67.14   median=68   spread_metric=26.7
+        safety_norm_gallup_lo         60.7843
+        safety_norm_gallup_night      68.0000
+        safety_norm_gpi               69.4000
+        safety_norm_numbeo            55.4000
+        safety_norm_wps               82.1000
+
+  BH   min=63.37   max=90   minmax=26.63   mean=77.98   median=77.7   spread_metric=26.63
+        safety_norm_gallup_lo         82.3529
+        safety_norm_gallup_night      90.0000
+        safety_norm_gpi               63.3667
+        safety_norm_numbeo            77.7000
+        safety_norm_wps               76.5000
+
+  BZ   min=48.2   max=74   minmax=25.8   mean=60.46   median=59.82   spread_metric=25.8
+        safety_norm_gallup_lo         52.9412
+        safety_norm_gallup_night      74.0000
+        safety_norm_numbeo            48.2000
+        safety_norm_wps               66.7000
+
+  NO   min=66.7   max=92.4   minmax=25.7   mean=82.59   median=84.31   spread_metric=25.7
+        safety_norm_gallup_lo         84.3137
+        safety_norm_gallup_night      91.0000
+        safety_norm_gpi               78.5333
+        safety_norm_numbeo            66.7000
+        safety_norm_wps               92.4000
+
+  NE   min=41.37   max=67   minmax=25.63   mean=51.16   median=48.13   spread_metric=25.63
+        safety_norm_gallup_lo         47.0588
+        safety_norm_gallup_night      67.0000
+        safety_norm_gpi               41.3667
+        safety_norm_wps               49.2000
+
+  BB   min=55.3   max=80.7   minmax=25.4   mean=68   median=68   spread_metric=25.4
+        safety_norm_numbeo            55.3000
+        safety_norm_wps               80.7000
+
+  DE   min=61.6   max=86.9   minmax=25.3   mean=77.06   median=78   spread_metric=25.3
+        safety_norm_gallup_lo         76.4706
+        safety_norm_gallup_night      78.0000
+        safety_norm_gpi               82.3333
+        safety_norm_numbeo            61.6000
+        safety_norm_wps               86.9000
+
+  KP   min=36.3   max=61.6   minmax=25.3   mean=48.95   median=48.95   spread_metric=25.3
+        safety_norm_gpi               36.3000
+        safety_norm_numbeo            61.6000
+
+  LU   min=66.8   max=91.8   minmax=25   mean=79.3   median=79.3   spread_metric=25
+        safety_norm_numbeo            66.8000
+        safety_norm_wps               91.8000
+
+  GH   min=45.1   max=70.07   minmax=24.97   mean=60.77   median=63.9   spread_metric=24.97
+        safety_norm_gallup_lo         45.0980
+        safety_norm_gallup_night      65.0000
+        safety_norm_gpi               70.0667
+        safety_norm_numbeo            59.8000
+        safety_norm_wps               63.9000
+
+  LV   min=63.7   max=88.4   minmax=24.7   mean=74.44   median=74   spread_metric=24.7
+        safety_norm_gallup_lo         64.7059
+        safety_norm_gallup_night      74.0000
+        safety_norm_gpi               81.4000
+        safety_norm_numbeo            63.7000
+        safety_norm_wps               88.4000
+
+  KM   min=43.14   max=67   minmax=23.86   mean=56.38   median=59   spread_metric=23.86
+        safety_norm_gallup_lo         43.1373
+        safety_norm_gallup_night      67.0000
+        safety_norm_wps               59.0000
+
+  ES   min=62.4   max=86.2   minmax=23.8   mean=76.58   median=80.73   spread_metric=23.8
+        safety_norm_gallup_lo         72.5490
+        safety_norm_gallup_night      81.0000
+        safety_norm_gpi               80.7333
+        safety_norm_numbeo            62.4000
+        safety_norm_wps               86.2000
+
+  KW   min=67.4   max=91   minmax=23.6   mean=77.15   median=76.47   spread_metric=23.6
+        safety_norm_gallup_lo         76.4706
+        safety_norm_gallup_night      91.0000
+        safety_norm_gpi               78.6000
+        safety_norm_numbeo            67.4000
+        safety_norm_wps               72.3000
+
+  CD   min=23.53   max=47   minmax=23.47   mean=33.59   median=33.3   spread_metric=23.47
+        safety_norm_gallup_lo         23.5294
+        safety_norm_gallup_night      47.0000
+        safety_norm_gpi               23.6000
+        safety_norm_numbeo            33.3000
+        safety_norm_wps               40.5000
+
+  MV   min=47.6   max=70.4   minmax=22.8   mean=59   median=59   spread_metric=22.8
+        safety_norm_numbeo            47.6000
+        safety_norm_wps               70.4000
+
+  BY   min=51.5   max=73.9   minmax=22.4   mean=61.06   median=57.77   spread_metric=22.4
+        safety_norm_gpi               57.7667
+        safety_norm_numbeo            51.5000
+        safety_norm_wps               73.9000
+
+  HT   min=19.9   max=42.3   minmax=22.4   mean=34.03   median=39.9   spread_metric=22.4
+        safety_norm_gpi               42.3000
+        safety_norm_numbeo            19.9000
+        safety_norm_wps               39.9000
+
+  IS   min=74.5   max=96.83   minmax=22.33   mean=87.76   median=88   spread_metric=22.33
+        safety_norm_gallup_lo         86.2745
+        safety_norm_gallup_night      88.0000
+        safety_norm_gpi               96.8333
+        safety_norm_numbeo            74.5000
+        safety_norm_wps               93.2000
+
+  CY   min=54.9   max=77   minmax=22.1   mean=67.9   median=68.9   spread_metric=22.1
+        safety_norm_gallup_lo         54.9020
+        safety_norm_gallup_night      72.0000
+        safety_norm_gpi               68.9000
+        safety_norm_numbeo            66.7000
+        safety_norm_wps               77.0000
+
+  ZW   min=37.25   max=59.23   minmax=21.98   mean=47.02   median=40   spread_metric=21.98
+        safety_norm_gallup_lo         37.2549
+        safety_norm_gallup_night      40.0000
+        safety_norm_gpi               59.2333
+        safety_norm_numbeo            39.6000
+        safety_norm_wps               59.0000
+
+  LT   min=66.8   max=88.7   minmax=21.9   mean=76.69   median=74   spread_metric=21.9
+        safety_norm_gallup_lo         72.5490
+        safety_norm_gallup_night      74.0000
+        safety_norm_gpi               81.4000
+        safety_norm_numbeo            66.8000
+        safety_norm_wps               88.7000
+
+  GE   min=60.5   max=82   minmax=21.5   mean=74.51   median=76.47   spread_metric=21.5
+        safety_norm_gallup_lo         76.4706
+        safety_norm_gallup_night      82.0000
+        safety_norm_gpi               60.5000
+        safety_norm_numbeo            73.8000
+        safety_norm_wps               79.8000
+
+  TZ   min=46.5   max=68   minmax=21.5   mean=61.5   median=62.75   spread_metric=21.5
+        safety_norm_gallup_lo         62.7451
+        safety_norm_gallup_night      68.0000
+        safety_norm_gpi               67.8333
+        safety_norm_numbeo            46.5000
+        safety_norm_wps               62.4000
+
+  ME   min=65.6   max=87   minmax=21.4   mean=76.89   median=77.17   spread_metric=21.4
+        safety_norm_gallup_lo         80.3922
+        safety_norm_gallup_night      87.0000
+        safety_norm_gpi               77.1667
+        safety_norm_numbeo            65.6000
+        safety_norm_wps               74.3000
+
+  RS   min=63   max=84.4   minmax=21.4   mean=72.71   median=69.53   spread_metric=21.4
+        safety_norm_gallup_lo         68.6275
+        safety_norm_gallup_night      78.0000
+        safety_norm_gpi               69.5333
+        safety_norm_numbeo            63.0000
+        safety_norm_wps               84.4000
+
+  CI   min=44.3   max=65   minmax=20.7   mean=57.17   median=59.68   spread_metric=20.7
+        safety_norm_gallup_lo         54.9020
+        safety_norm_gallup_night      65.0000
+        safety_norm_gpi               64.4667
+        safety_norm_numbeo            44.3000
+
+  PT   min=67   max=87.63   minmax=20.63   mean=79.04   median=78   spread_metric=20.63
+        safety_norm_gallup_lo         76.4706
+        safety_norm_gallup_night      78.0000
+        safety_norm_gpi               87.6333
+        safety_norm_numbeo            67.0000
+        safety_norm_wps               86.1000
+
+  SG   min=77.5   max=98   minmax=20.5   mean=88.44   median=88.4   spread_metric=20.5
+        safety_norm_gallup_lo         90.1961
+        safety_norm_gallup_night      98.0000
+        safety_norm_gpi               88.1000
+        safety_norm_numbeo            77.5000
+        safety_norm_wps               88.4000
+
+  TR   min=38.27   max=58.5   minmax=20.23   mean=48.38   median=48.38   spread_metric=20.23
+        safety_norm_gpi               38.2667
+        safety_norm_numbeo            58.5000
+
+  DK   min=73.8   max=93.9   minmax=20.1   mean=84.8   median=86.9   spread_metric=20.1
+        safety_norm_gallup_lo         80.3922
+        safety_norm_gallup_night      89.0000
+        safety_norm_gpi               86.9000
+        safety_norm_numbeo            73.8000
+        safety_norm_wps               93.9000
+
+  MK   min=58.6   max=78.7   minmax=20.1   mean=69.68   median=73.37   spread_metric=20.1
+        safety_norm_gallup_lo         62.7451
+        safety_norm_gallup_night      75.0000
+        safety_norm_gpi               73.3667
+        safety_norm_numbeo            58.6000
+        safety_norm_wps               78.7000

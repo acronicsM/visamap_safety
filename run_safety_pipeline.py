@@ -1,20 +1,15 @@
 """
-Единый запуск: кэш справочника стран, четыре парсера, объединённый JSON и единый индекс безопасности.
+Единый запуск: четыре парсера, объединённый JSON и единый индекс безопасности.
 
-Требует: API_COUNTRIES_URL в .env (или переменных окружения), либо готовый --reference-json.
+Требует локальный файл справочника стран: REFERENCE_COUNTRIES_FILE в .env (по умолчанию
+reference_countries.json в корне репо) или явный --reference-json.
+
 PDF-пути: GALLUP_DATA_FILE, WOMEN_PEACE_SECURITY_INDEX_FILE.
 
+Итог всегда полный merged (meta, countries, by_iso2, unmatched) в MERGED_OUTPUT_FILE.
+Числовые метрики из парсеров, равные 0, в merged не попадают (как отсутствующие).
 После успешного merge по умолчанию удаляются промежуточные gallup/gpi/numbeo/wps *_data.json
-и кэш справочника внутри корня репо (см. SAFETY_PIPELINE_DELETE_INTERMEDIATE и --keep-intermediate).
-Внешний --reference-json вне репозитория не трогаем.
-
-Минимальный вывод в --merged-out (только {"by_iso2": {ISO2: {"safety_final_score": ...}}}):
-флаг --minimal-by-iso2-only или SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY=1 в .env.
-Отмена полным JSON: --full-merged-out.
-
-Отправка итога на сервер вместо записи MERGED_OUTPUT_FILE: --push-safety-final-scores.
-Нужны SAFETY_FINAL_SCORES_PUT_URL (полный URL) и SAFETY_FINAL_SCORES_X_API_KEY (заголовок X-Api-Key);
-PUT, Content-Type: application/json, тело как у сформированного merged JSON.
+в корне репо; справочник REFERENCE_COUNTRIES_FILE не трогаем. Отмена удаления: --keep-intermediate.
 """
 
 from __future__ import annotations
@@ -27,13 +22,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-import requests
 from dotenv import load_dotenv
 
 from country_reference import (
-    COUNTRIES_NAMES_PATH,
     effective_manual_map_path,
-    fetch_reference,
     load_manual_map,
     display_name_for_iso2,
     load_reference_from_path,
@@ -49,72 +41,12 @@ SOURCE_OUTPUTS = {
     "wps": "wps_data.json",
 }
 
-def _is_under_directory(root: Path, path: Path) -> bool:
-    try:
-        path.resolve().relative_to(root.resolve())
-        return True
-    except ValueError:
-        return False
-
 
 def _unlink_if_exists(path: Path) -> None:
     try:
         path.unlink(missing_ok=True)
     except OSError as e:
         print(f"Предупреждение: не удалось удалить {path}: {e}", file=sys.stderr)
-
-
-def _env_delete_intermediate_enabled() -> bool:
-    """SAFETY_PIPELINE_DELETE_INTERMEDIATE: 1/true (по умолчанию) — удалять; 0/false — оставить."""
-    raw = os.environ.get("SAFETY_PIPELINE_DELETE_INTERMEDIATE", "1").strip().lower()
-    if raw in ("0", "false", "no", "off", "n"):
-        return False
-    return True
-
-
-def _env_merged_minimal_by_iso2_enabled() -> bool:
-    """SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY: 1/true — в merged-out только by_iso2 → safety_final_score."""
-    raw = os.environ.get("SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY", "").strip().lower()
-    return raw in ("1", "true", "yes", "on", "y")
-
-
-def _push_safety_final_scores(out_doc: dict) -> None:
-    url = (os.environ.get("SAFETY_FINAL_SCORES_PUT_URL") or "").strip()
-    api_key = (os.environ.get("SAFETY_FINAL_SCORES_X_API_KEY") or "").strip()
-    if not url:
-        print(
-            "Для --push-safety-final-scores задайте SAFETY_FINAL_SCORES_PUT_URL в .env",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-    if not api_key:
-        print(
-            "Для --push-safety-final-scores задайте SAFETY_FINAL_SCORES_X_API_KEY в .env",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-    headers = {
-        "Content-Type": "application/json",
-        "X-Api-Key": api_key,
-    }
-    try:
-        r = requests.put(url, json=out_doc, headers=headers, timeout=120)
-    except requests.RequestException as e:
-        print(f"Ошибка запроса PUT: {e}", file=sys.stderr)
-        sys.exit(1)
-    if r.status_code >= 400:
-        body_preview = (r.text or "")[:2000]
-        print(
-            f"PUT завершился с кодом {r.status_code}. Тело ответа:\n{body_preview}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-    preview = (r.text or "").strip()
-    if preview:
-        short = preview if len(preview) <= 500 else preview[:500] + "…"
-        print(f"✓ Отправлено PUT {url} → HTTP {r.status_code}\n  Ответ: {short}")
-    else:
-        print(f"✓ Отправлено PUT {url} → HTTP {r.status_code}")
 
 
 FLAT_KEYS = {
@@ -131,11 +63,13 @@ FLAT_KEYS = {
 }
 
 
-def save_reference(base_url: str, out_path: Path) -> None:
-    ref = fetch_reference(base_url)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(ref, f, indent=2, ensure_ascii=False)
+def _numeric_zero_as_missing(val: object) -> bool:
+    """Нуль из парсеров не переносим в merged — дальше метрика считается отсутствующей."""
+    if isinstance(val, bool):
+        return False
+    if isinstance(val, (int, float)):
+        return float(val) == 0.0
+    return False
 
 
 def run_parser(
@@ -195,8 +129,9 @@ def merge_loaded(
                 if raw_key not in c:
                     continue
                 val = c[raw_key]
-                if val is not None:
-                    by_iso2[iso_u][out_key] = val
+                if val is None or _numeric_zero_as_missing(val):
+                    continue
+                by_iso2[iso_u][out_key] = val
 
     for iso, row in by_iso2.items():
         if "name" not in row or not row["name"]:
@@ -237,17 +172,21 @@ def merge_loaded(
     }
 
 
+def _resolve_reference_path(args_reference_json: str | None) -> Path:
+    if args_reference_json:
+        return Path(args_reference_json)
+    env_path = os.environ.get("REFERENCE_COUNTRIES_FILE")
+    if env_path:
+        return Path(env_path)
+    return ROOT / "reference_countries.json"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Пайплайн парсеров безопасности + merge")
     parser.add_argument(
         "--reference-json",
         default=None,
-        help=f"Готовый кэш API ({COUNTRIES_NAMES_PATH}); иначе запрос по API_COUNTRIES_URL",
-    )
-    parser.add_argument(
-        "--reference-out",
-        default=None,
-        help="Куда сохранить кэш при успешном fetch (по умолчанию reference_countries.json в корне репо)",
+        help="JSON справочника стран (перекрывает REFERENCE_COUNTRIES_FILE; по умолчанию env или reference_countries.json)",
     )
     parser.add_argument(
         "--merged-out",
@@ -260,16 +199,6 @@ def main() -> None:
         help="manual_country_map.json (по умолчанию env или файл рядом с country_reference)",
     )
     parser.add_argument(
-        "--skip-fetch",
-        action="store_true",
-        help="Не вызывать API: использовать только существующий --reference-json",
-    )
-    parser.add_argument(
-        "--keep-intermediate",
-        action="store_true",
-        help="Не удалять после merge промежуточные *_data.json и кэш справочника в корне репо",
-    )
-    parser.add_argument(
         "--safety-config",
         default=None,
         help="JSON весов и границ (по умолчанию env SAFETY_INDEX_CONFIG_FILE или safety_index_config.json)",
@@ -280,59 +209,30 @@ def main() -> None:
         help="JSON ручных оценок (по умолчанию env SAFETY_MANUAL_SCORES_FILE или safety_manual_scores.json)",
     )
     parser.add_argument(
-        "--minimal-by-iso2-only",
+        "--keep-intermediate",
         action="store_true",
-        help="В merged-out только by_iso2 → safety_final_score (или через env SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY)",
-    )
-    parser.add_argument(
-        "--full-merged-out",
-        action="store_true",
-        help="Всегда полный merged в --merged-out (отменяет SAFETY_MERGED_MINIMAL_BY_ISO2_ONLY)",
-    )
-    parser.add_argument(
-        "--push-safety-final-scores",
-        action="store_true",
-        help=(
-            "Не писать MERGED_OUTPUT_FILE: отправить итог PUT на SAFETY_FINAL_SCORES_PUT_URL "
-            "(заголовок X-Api-Key из SAFETY_FINAL_SCORES_X_API_KEY)"
-        ),
+        help="Не удалять после merge промежуточные *_data.json парсеров",
     )
     args = parser.parse_args()
 
     load_dotenv(ROOT / ".env")
 
-    merged_out_minimal = (
-        not args.full_merged_out
-        and (args.minimal_by_iso2_only or _env_merged_minimal_by_iso2_enabled())
-    )
+    ref_path = _resolve_reference_path(args.reference_json)
+    if not ref_path.is_file():
+        print(
+            f"Файл справочника стран не найден: {ref_path.resolve()}\n"
+            "Задайте REFERENCE_COUNTRIES_FILE в .env или существующий --reference-json.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
-    ref_out = Path(args.reference_out or os.environ.get("REFERENCE_COUNTRIES_FILE") or ROOT / "reference_countries.json")
+    ref_path_arg = str(ref_path.resolve())
+    ref = load_reference_from_path(ref_path_arg)
+
     merged_out = Path(args.merged_out or os.environ.get("MERGED_OUTPUT_FILE") or ROOT / "safety_merged.json")
 
     manual_explicit = args.manual_map or os.environ.get("MANUAL_COUNTRY_MAP_FILE")
     manual_path = effective_manual_map_path(manual_explicit)
-
-    ref: dict
-    ref_path_arg: str
-
-    if args.skip_fetch:
-        if not args.reference_json:
-            print("При --skip-fetch нужен существующий --reference-json", file=sys.stderr)
-            sys.exit(1)
-        ref_path_arg = args.reference_json
-        ref = load_reference_from_path(ref_path_arg)
-    elif args.reference_json and Path(args.reference_json).is_file():
-        ref_path_arg = args.reference_json
-        ref = load_reference_from_path(ref_path_arg)
-    else:
-        base = os.environ.get("API_COUNTRIES_URL")
-        if not base:
-            print("Задайте API_COUNTRIES_URL или существующий --reference-json", file=sys.stderr)
-            sys.exit(1)
-        print(f"Загрузка справочника: {base.rstrip('/')}{COUNTRIES_NAMES_PATH}")
-        save_reference(base, ref_out)
-        ref_path_arg = str(ref_out)
-        ref = load_reference_from_path(ref_path_arg)
 
     ref_args = ["--reference-json", ref_path_arg]
     manual_args: list[str] = []
@@ -342,10 +242,22 @@ def main() -> None:
     gallup_pdf = os.environ.get("GALLUP_DATA_FILE")
     wps_pdf = os.environ.get("WOMEN_PEACE_SECURITY_INDEX_FILE")
     if not gallup_pdf or not Path(gallup_pdf).is_file():
-        print("Нужен существующий файл GALLUP_DATA_FILE в .env", file=sys.stderr)
+        gp = Path(gallup_pdf) if gallup_pdf else None
+        resolved = gp.resolve() if gp else "(переменная не задана)"
+        print(
+            "Файл Gallup PDF не найден. Проверьте GALLUP_DATA_FILE в .env и cwd.\n"
+            f"  Ожидался путь: {resolved}",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if not wps_pdf or not Path(wps_pdf).is_file():
-        print("Нужен существующий файл WOMEN_PEACE_SECURITY_INDEX_FILE в .env", file=sys.stderr)
+        wp = Path(wps_pdf) if wps_pdf else None
+        resolved = wp.resolve() if wp else "(переменная не задана)"
+        print(
+            "Файл WPS PDF не найден. Проверьте WOMEN_PEACE_SECURITY_INDEX_FILE в .env и cwd.\n"
+            f"  Ожидался путь: {resolved}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     run_parser("GallupParser.py", [gallup_pdf, *ref_args, *manual_args], cwd=ROOT)
@@ -369,45 +281,16 @@ def main() -> None:
         manual_path=safety_manual_path,
     )
 
-    if merged_out_minimal:
-        by_full = merged.get("by_iso2") or {}
-        out_doc = {
-            "by_iso2": {
-                iso: {"safety_final_score": row.get("safety_final_score")}
-                for iso, row in sorted(by_full.items())
-            },
-        }
-        dump_kw: dict = {"ensure_ascii": False, "separators": (",", ":")}
-    else:
-        out_doc = merged
-        dump_kw = {"ensure_ascii": False, "indent": 2}
+    with open(merged_out, "w", encoding="utf-8") as f:
+        json.dump(merged, f, ensure_ascii=False, indent=2)
+    print(f"✓ Объединённый файл: {merged_out}")
 
-    if args.push_safety_final_scores:
-        _push_safety_final_scores(out_doc)
-    else:
-        with open(merged_out, "w", encoding="utf-8") as f:
-            json.dump(out_doc, f, **dump_kw)
-        print(f"✓ Объединённый файл: {merged_out}")
-
-    if merged_out_minimal:
-        print("  Режим: только by_iso2 → safety_final_score (компактный JSON)")
     print(f"  Стран с iso2: {len(merged['by_iso2'])}, unmatched: {len(merged['unmatched'])}")
 
-    delete_intermediate = _env_delete_intermediate_enabled() and not args.keep_intermediate
-    if delete_intermediate:
+    if not args.keep_intermediate:
         for fname in SOURCE_OUTPUTS.values():
             _unlink_if_exists(ROOT / fname)
         print("  Удалены промежуточные JSON:", ", ".join(SOURCE_OUTPUTS.values()))
-
-        ref_cache_path = Path(ref_path_arg).resolve()
-        if ref_cache_path.is_file() and _is_under_directory(ROOT, ref_cache_path):
-            _unlink_if_exists(ref_cache_path)
-            print(f"  Удалён кэш справочника: {ref_cache_path}")
-    else:
-        print(
-            "  Промежуточные файлы не удалены "
-            "(--keep-intermediate или SAFETY_PIPELINE_DELETE_INTERMEDIATE=0/false/no)"
-        )
 
 
 if __name__ == "__main__":

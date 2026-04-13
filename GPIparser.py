@@ -10,6 +10,7 @@
 
 Опционально: --output, --reference-json, --manual-map.
 Без справочника стран iso2: null.
+Для Wikipedia: в .env задайте WIKIPEDIA_USER_AGENT (контакт оператора), иначе возможны HTTP 403 / rate limit.
 """
 
 import argparse
@@ -17,21 +18,42 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
 from country_reference import enrich_country_entries, load_reference
 
 URL = "https://en.wikipedia.org/wiki/Global_Peace_Index"
+ROOT = Path(__file__).resolve().parent
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; learning-parser/1.0)"
-}
+
+def _wikipedia_headers() -> dict[str, str]:
+    """
+    Wikimedia требует осмысленный User-Agent с контактом оператора.
+    См. https://meta.wikimedia.org/wiki/User-Agent_policy
+    """
+    lib_ua = requests.utils.default_user_agent()
+    custom = (os.environ.get("WIKIPEDIA_USER_AGENT") or "").strip()
+    if custom:
+        ua = custom
+    else:
+        ua = (
+            "visamap_safety-GPIparser/1.0 "
+            "(set WIKIPEDIA_USER_AGENT in .env with your repo URL or email per Wikimedia policy) "
+            f"{lib_ua}"
+        )
+    return {
+        "User-Agent": ua,
+        "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
 
 
 def fetch_gpi_html() -> str:
-    response = requests.get(URL, headers=HEADERS, timeout=15)
+    response = requests.get(URL, headers=_wikipedia_headers(), timeout=30)
     response.raise_for_status()
     return response.text
 
@@ -83,6 +105,8 @@ def main() -> None:
     parser.add_argument("--manual-map", default=None)
     args = parser.parse_args()
 
+    load_dotenv(ROOT / ".env")
+
     print("Шаг 1: Скачиваем страницу Wikipedia...")
     try:
         html = fetch_gpi_html()
@@ -94,6 +118,13 @@ def main() -> None:
         sys.exit(1)
     except requests.exceptions.HTTPError as e:
         print(f"  ✗ Ошибка HTTP: {e}")
+        if e.response is not None and e.response.status_code in (403, 429):
+            print(
+                "  Подсказка: Wikipedia часто отклоняет запросы без корректного User-Agent.\n"
+                "  Задайте в .env переменную WIKIPEDIA_USER_AGENT (см. .env.example и User-Agent policy Wikimedia).\n"
+                "  Если был rate limit — подождите несколько минут и повторите.",
+                file=sys.stderr,
+            )
         sys.exit(1)
 
     print(f"  Статус: OK, размер HTML: {len(html)} символов")
